@@ -135,7 +135,7 @@ FROM(
 # неправильного состояния, которые необходимо найти. Результирующий кортеж
 # выборки должен содержать информацию о двух конфликтующих номерах.
 
-SELECT t_1.id_room, t_1.id_room_in_booking, t_2.id_room_in_booking
+EXPLAIN SELECT t_1.id_room, t_1.id_room_in_booking, t_2.id_room_in_booking
 FROM room_in_booking AS t_1
 INNER JOIN room_in_booking AS t_2
 ON t_1.id_room = t_2.id_room AND t_1.id_room_in_booking != t_2.id_room_in_booking
@@ -145,11 +145,11 @@ ORDER BY t_1.id_room_in_booking;
 # 8. Создать бронирование в транзакции.
 
 START TRANSACTION;
-	INSERT INTO lw_5.booking (id_client, id_booking, booking_date)
-    VALUES (82, 4444, '2021-03-02');
-    
-    INSERT INTO lw_5.room_in_booking (id_room_in_booking, id_booking, id_room, checking_date, checkout_date)
-    VALUES (4444, 4444, 5, '2021-06-01', '2021-06-15');
+	INSERT INTO lw_5.booking (id_client, booking_date)
+    VALUES (82, '2021-03-02');
+
+    INSERT INTO lw_5.room_in_booking ( id_room, checking_date, checkout_date)
+    VALUES (get_last_id(), 5, '2021-06-01', '2021-06-15');
 COMMIT;
 ROLLBACK;
 
@@ -171,6 +171,17 @@ CREATE INDEX IX_room_in_booking_id_room ON lw_5.room_in_booking
 (
 	id_room 
 );
+
+CREATE INDEX IX_room_in_booking_checking_date ON lw_5.room_in_booking
+(
+	checking_date
+);
+
+CREATE INDEX IX_room_in_booking_checkout_date ON lw_5.room_in_booking
+(
+	checkout_date
+);
+
 
 CREATE INDEX IX_room_id_hotel ON lw_5.room
 (
